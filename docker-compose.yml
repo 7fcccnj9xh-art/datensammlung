@@ -1,0 +1,197 @@
+# ============================================================
+# Knowledge Collector – Docker Compose (Produktion)
+# UGREEN DXP2800 NAS / UGOS Pro
+# ============================================================
+# Starten: docker-compose up -d
+# Stoppen:  docker-compose down
+# Logs:     docker-compose logs -f backend
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # BACKEND: FastAPI + APScheduler
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kc_backend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8420}:8420"
+    environment:
+      - DB_HOST=${DB_HOST:-192.168.0.101}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-knowledge_collector}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_POOL_SIZE=${DB_POOL_SIZE:-10}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_DEFAULT_MODEL=${OLLAMA_DEFAULT_MODEL:-llama3.2}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CLAUDE_DEFAULT_MODEL=${CLAUDE_DEFAULT_MODEL:-claude-haiku-4-5-20251001}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_DEFAULT_MODEL=${OPENAI_DEFAULT_MODEL:-gpt-4o-mini}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-auto}
+      - LLM_MONTHLY_BUDGET_EUR=${LLM_MONTHLY_BUDGET_EUR:-5.00}
+      - WEATHER_LAT=${WEATHER_LAT:-47.9990}
+      - WEATHER_LON=${WEATHER_LON:-7.8421}
+      - WEATHER_LOCATION_NAME=${WEATHER_LOCATION_NAME:-Mein Standort}
+      - DWD_STATION_ID=${DWD_STATION_ID:-}
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY:-}
+      - WEATHER_FETCH_INTERVAL_MIN=${WEATHER_FETCH_INTERVAL_MIN:-30}
+      - SCRAPING_DELAY_MIN=${SCRAPING_DELAY_MIN:-1.5}
+      - SCRAPING_DELAY_MAX=${SCRAPING_DELAY_MAX:-4.0}
+      - MAX_CONCURRENT_SCRAPERS=${MAX_CONCURRENT_SCRAPERS:-3}
+      - RESPECT_ROBOTS_TXT=${RESPECT_ROBOTS_TXT:-true}
+      - USE_PLAYWRIGHT=${USE_PLAYWRIGHT:-false}
+      - SEARXNG_URL=${SEARXNG_URL:-http://searxng:8080}
+      - SECRET_KEY=${SECRET_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - TZ=${TZ:-Europe/Berlin}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - OBSIDIAN_VAULT_PATH=${OBSIDIAN_VAULT_PATH:-}
+    volumes:
+      # Persistente Logs auf NAS
+      - ${NAS_DATA_PATH:-./data}/logs:/app/logs
+      # Exports und Backups
+      - ${NAS_DATA_PATH:-./data}/exports:/app/exports
+      # Optionaler Obsidian-Vault-Zugriff
+      - ${OBSIDIAN_VAULT_PATH:-./data/obsidian}:/app/obsidian
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - kc_internal
+    # UGREEN NAS: CPU/RAM begrenzen
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    extra_hosts:
+      # Zugriff auf Host (Mac oder NAS selbst) für Ollama
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8420/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ----------------------------------------------------------
+  # FRONTEND: Nginx + Vue.js Build
+  # ----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kc_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8421}:80"
+    depends_on:
+      - backend
+    networks:
+      - kc_internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ----------------------------------------------------------
+  # REDIS: Cache + Job-Queue
+  # ----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: kc_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1
+      --loglevel warning
+    volumes:
+      - ${NAS_DATA_PATH:-./data}/redis:/data
+    networks:
+      - kc_internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 160M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ----------------------------------------------------------
+  # SEARXNG: Self-hosted Metasuche
+  # ----------------------------------------------------------
+  searxng:
+    image: searxng/searxng:latest
+    container_name: kc_searxng
+    restart: unless-stopped
+    ports:
+      - "${SEARXNG_PORT:-8422}:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:${SEARXNG_PORT:-8422}/
+      - UWSGI_WORKERS=2
+      - UWSGI_THREADS=2
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    networks:
+      - kc_internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+# ----------------------------------------------------------
+# NETZWERK
+# ----------------------------------------------------------
+networks:
+  kc_internal:
+    driver: bridge
+    name: kc_network

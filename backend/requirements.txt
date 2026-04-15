@@ -1,0 +1,90 @@
+# ============================================================
+# Knowledge Collector – Python Dependencies
+# Python 3.11+
+# ============================================================
+
+# --- Web Framework ---
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12     # File-Uploads
+
+# --- Datenbank ---
+sqlalchemy[asyncio]==2.0.36
+aiomysql==0.2.0              # Async MySQL-Treiber
+alembic==1.14.0              # DB-Migrationen
+pymysql==1.1.1               # Sync-Treiber für Migrations
+
+# --- Konfiguration ---
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# --- HTTP / Scraping ---
+httpx==0.28.1                # Async HTTP-Client
+aiohttp==3.11.10             # Async HTTP (Fallback)
+beautifulsoup4==4.12.3
+lxml==5.3.0                  # HTML/XML-Parser
+feedparser==6.0.11           # RSS/Atom
+html2text==2024.2.26         # HTML → Markdown
+readability-lxml==0.8.1      # Hauptinhalt-Extraktion
+fake-useragent==1.5.1        # Browser-Simulation
+
+# --- Playwright (optional, für JS-heavy Seiten) ---
+# playwright==1.49.0          # Auskommentieren für leichtere Builds
+# greenlet==3.1.1
+
+# --- LLM Provider ---
+anthropic==0.42.0            # Claude API
+openai==1.58.1               # OpenAI API
+ollama==0.4.4                # Ollama Python Client
+tiktoken==0.8.0              # Token-Zählung (OpenAI)
+
+# --- Task Scheduling ---
+apscheduler==3.10.4
+asyncio-throttle==1.0.2      # Rate-Limiting
+
+# --- Cache / Queue ---
+redis==5.2.1
+aioredis==2.0.1
+
+# --- Datenverarbeitung ---
+python-dateutil==2.9.0
+pytz==2024.2
+pendulum==3.0.0              # Bessere Datetime-Handhabung
+ujson==5.10.0                # Schnelles JSON
+
+# --- Wetterdaten ---
+wetterdienst==0.90.0         # DWD Open Data Python-Wrapper
+geopy==2.4.1                 # Geo-Berechnungen
+
+# --- Text-Verarbeitung ---
+langdetect==1.0.9            # Spracherkennung
+chardet==5.2.0               # Encoding-Erkennung
+
+# --- Logging ---
+structlog==24.4.0            # Strukturiertes Logging
+colorlog==6.9.0              # Farbiges Logging für Entwicklung
+
+# --- Sicherheit ---
+passlib[bcrypt]==1.7.4       # Passwort-Hashing
+python-jose[cryptography]==3.3.0  # JWT
+
+# --- WebSocket ---
+websockets==14.1
+
+# --- Monitoring ---
+psutil==6.1.0                # System-Ressourcen
+
+# --- Benachrichtigungen ---
+aiosmtplib==3.0.2            # Async SMTP
+httpx[http2]==0.28.1         # Für Webhook/Pushover
+
+# --- Export ---
+markdown==3.7                # Markdown-Generierung
+jinja2==3.1.4                # Template-Engine für Reports
+
+# --- Tests (nur für Entwicklung) ---
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+httpx==0.28.1                # TestClient

@@ -1,0 +1,46 @@
+# ============================================================
+# Knowledge Collector – Docker Compose (Entwicklung)
+# Startet: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# ============================================================
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      target: development    # Multi-stage Build: development Stage
+    volumes:
+      # Hot-Reload: lokaler Code wird direkt eingebunden
+      - ./backend:/app
+    environment:
+      - LOG_LEVEL=DEBUG
+      - RELOAD=true
+    ports:
+      - "8420:8420"
+      - "5678:5678"          # debugpy Remote-Debugger
+    command: >
+      python -m debugpy --listen 0.0.0.0:5678
+      -m uvicorn main:app --host 0.0.0.0 --port 8420
+      --reload --log-level debug
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 1G
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules          # node_modules nicht überschreiben
+    ports:
+      - "5173:5173"                # Vite Dev Server
+    command: npm run dev -- --host
+    environment:
+      - VITE_API_URL=http://localhost:8420
+
+  searxng:
+    ports:
+      - "8422:8080"

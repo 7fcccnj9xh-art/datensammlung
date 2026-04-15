@@ -1,0 +1,26 @@
+# Secrets
+.env
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Daten & Logs
+data/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# SearXNG (generierte Keys)
+searxng/settings.yml
