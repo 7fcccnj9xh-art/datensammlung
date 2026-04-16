@@ -10,7 +10,7 @@ from typing import Optional
 
 import anthropic
 
-from core.llm.llm_router import LLMRequest, LLMResponse
+from core.llm.llm_types import LLMRequest, LLMResponse
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ import logging
 import tiktoken
 from openai import AsyncOpenAI
 
-from core.llm.llm_router import LLMRequest, LLMResponse
+from core.llm.llm_types import LLMRequest, LLMResponse
 
 logger = logging.getLogger(__name__)
 
