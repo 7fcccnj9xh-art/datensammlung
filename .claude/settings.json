@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(chmod +x /Users/whaa/Documents/GitHub/Datensammlung/scripts/setup.sh /Users/whaa/Documents/GitHub/Datensammlung/scripts/backup.sh)"
+      "Bash(chmod +x /Users/whaa/Documents/GitHub/Datensammlung/scripts/setup.sh /Users/whaa/Documents/GitHub/Datensammlung/scripts/backup.sh)",
+      "Bash(sed -i '' 's|NAS_DATA_PATH=/volume1/docker/knowledge-collector/data|NAS_DATA_PATH=/volume2/docker/knowledge-collector/data|' /Users/whaa/Documents/GitHub/Datensammlung/.env)",
+      "Bash(sed -i '' 's|NAS_BACKUP_PATH=/volume1/Backups/knowledge-collector|NAS_BACKUP_PATH=/volume2/Backups/knowledge-collector|' /Users/whaa/Documents/GitHub/Datensammlung/.env)",
+      "Bash(docker run *)"
     ]
   }
 }
