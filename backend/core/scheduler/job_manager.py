@@ -178,5 +178,7 @@ class JobManager:
                     setattr(job, key, value)
                 # Laufzeit berechnen
                 if job.started_at and kwargs.get("completed_at"):
-                    delta = kwargs["completed_at"] - job.started_at
+                    started = job.started_at.replace(tzinfo=None) if job.started_at.tzinfo else job.started_at
+                    completed = kwargs["completed_at"].replace(tzinfo=None) if kwargs["completed_at"].tzinfo else kwargs["completed_at"]
+                    delta = completed - started
                     job.duration_seconds = int(delta.total_seconds())
