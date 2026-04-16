@@ -300,6 +300,15 @@ class ResearchTask:
 
     async def _save_result(self, **kwargs) -> int:
         """Recherche-Ergebnis in DB speichern."""
+        # meta_data: datetime-Objekte in Strings umwandeln
+        if "meta_data" in kwargs and isinstance(kwargs["meta_data"], dict):
+            import json
+            def _default(o):
+                if hasattr(o, "isoformat"):
+                    return o.isoformat()
+                return str(o)
+            kwargs["meta_data"] = json.loads(json.dumps(kwargs["meta_data"], default=_default))
+
         async with get_db_session() as db:
             result = ResearchResult(**kwargs)
             db.add(result)

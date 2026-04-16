@@ -157,7 +157,7 @@ class WeatherCollector:
             cloud_cover_pct     = data.get("cloud_cover"),
             visibility_m        = data.get("visibility"),
             sunshine_min        = _dec(data.get("sunshine")),
-            weather_code        = data.get("condition"),
+            weather_code        = None,  # DWD liefert Strings, nicht numerische Codes
             weather_description = data.get("condition"),
             is_forecast         = is_forecast,
             raw_json            = data,
