@@ -73,9 +73,10 @@ class ResearchTask:
             else:
                 metrics["urls_skipped"] += 1
 
-        # 2. Web-Suche für Topic-Keywords
-        if topic.keywords:
-            search_results = await self._search_web(topic)
+        # 2. Web-Suche für Topic-Keywords (Fallback: Topic-Name)
+        keywords = topic.keywords or [topic.name]
+        if keywords:
+            search_results = await self._search_web_with_keywords(topic, keywords)
             for url in search_results[:self.settings.search_max_results]:
                 result_data = await self._process_url(url, topic, job_id)
                 if result_data:
@@ -228,10 +229,17 @@ class ResearchTask:
 
         return {"is_new": True}
 
+    async def _search_web_with_keywords(self, topic: Topic, keywords: list[str]) -> list[str]:
+        """Web-Suche via SearXNG mit expliziten Keywords."""
+        return await self._search_web_queries(keywords[:3])
+
     async def _search_web(self, topic: Topic) -> list[str]:
         """Web-Suche via SearXNG oder DuckDuckGo."""
+        return await self._search_web_queries((topic.keywords or [topic.name])[:3])
+
+    async def _search_web_queries(self, queries: list[str]) -> list[str]:
+        """Web-Suche für eine Liste von Suchanfragen."""
         urls = []
-        queries = topic.keywords[:3]  # Max 3 Suchanfragen
 
         for query in queries:
             try:
