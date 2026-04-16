@@ -99,6 +99,7 @@ async def create_topic(data: TopicCreate, db: AsyncSession = Depends(get_db)):
     topic = Topic(slug=slug, **data.model_dump())
     db.add(topic)
     await db.flush()
+    await db.refresh(topic)
     return _topic_to_dict(topic)
 
 
@@ -117,6 +118,8 @@ async def update_topic(
     topic = await _get_or_404(db, topic_id)
     for key, value in data.model_dump(exclude_none=True).items():
         setattr(topic, key, value)
+    await db.flush()
+    await db.refresh(topic)
 
     # Scheduler anpassen wenn Status geändert
     scheduler = get_scheduler()
