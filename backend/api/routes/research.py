@@ -95,31 +95,48 @@ async def trigger_research(topic_id: int, db: AsyncSession = Depends(get_db)):
 async def adhoc_research(data: AdHocResearch):
     """
     Ad-hoc Recherche ohne gespeichertes Topic.
-    Kann optional als neues Topic gespeichert werden.
+    Ohne URLs: automatische Suche via SearXNG.
     """
     from core.collectors.web_scraper import WebScraper
+    from core.collectors.search_collector import SearchCollector
     from core.processors.llm_processor import get_llm_processor
     from core.processors.text_processor import get_text_processor
+    from config.settings import get_settings
 
     scraper  = WebScraper()
     text_p   = get_text_processor()
     llm_p    = get_llm_processor()
     results  = []
 
-    for url in data.urls[:5]:
-        collected = await scraper.collect(url)
-        if collected.success and text_p.is_meaningful(collected.content):
-            summary = await llm_p.summarize(
-                content     = collected.content,
-                topic_name  = data.query,
-                llm_provider= data.llm_provider,
-            )
-            results.append({
-                "url":     url,
-                "title":   collected.title,
-                "summary": summary,
-                "content": text_p.truncate(collected.content, 500),
-            })
+    urls = data.urls[:5]
+
+    # Keine URLs angegeben → SearXNG suchen
+    if not urls:
+        try:
+            settings = get_settings()
+            searcher = SearchCollector(searxng_url=settings.searxng_url)
+            search_results = await searcher.search(data.query, num_results=5)
+            urls = [r["url"] for r in search_results if r.get("url")]
+        except Exception as e:
+            pass  # Ohne SearXNG direkt leere Antwort
+
+    for url in urls:
+        try:
+            collected = await scraper.collect(url)
+            if collected.success and text_p.is_meaningful(collected.content):
+                summary = await llm_p.summarize(
+                    content     = collected.content,
+                    topic_name  = data.query,
+                    llm_provider= data.llm_provider,
+                )
+                results.append({
+                    "url":     url,
+                    "title":   collected.title,
+                    "summary": summary,
+                    "content": text_p.truncate(collected.content, 500),
+                })
+        except Exception:
+            continue
 
     return {"query": data.query, "results": results, "count": len(results)}
 
