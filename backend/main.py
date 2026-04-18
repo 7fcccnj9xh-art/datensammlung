@@ -15,7 +15,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from config.settings import get_settings
 from config.database import init_database, close_database
@@ -126,8 +126,34 @@ app.include_router(weather.router,        prefix=f"{API_PREFIX}/weather",       
 
 
 # ----------------------------------------------------------
-# Health + Info Endpunkte
+# Root + Health + Info Endpunkte
 # ----------------------------------------------------------
+@app.get("/", tags=["System"], include_in_schema=False)
+async def root():
+    """Root-Endpunkt: Verweis auf API-Doku und Frontend."""
+    return {
+        "service": "knowledge-collector",
+        "status": "running",
+        "version": "1.0.0",
+        "docs": "/api/docs",
+        "openapi": "/api/openapi.json",
+        "frontend": f"http://{settings.app_host if hasattr(settings, 'app_host') else '192.168.0.101'}:{settings.frontend_port}"
+                    if hasattr(settings, "frontend_port") else None,
+        "endpoints": {
+            "health": "/health",
+            "status": "/api/status",
+            "config": "/api/config",
+            "topics": "/api/topics",
+            "research": "/api/research",
+            "sources": "/api/sources",
+            "structured_data": "/api/data",
+            "jobs": "/api/jobs",
+            "llm": "/api/llm",
+            "weather": "/api/weather",
+        },
+    }
+
+
 @app.get("/health", tags=["System"])
 async def health_check():
     """Systemstatus für Docker Health-Check."""
