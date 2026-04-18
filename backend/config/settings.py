@@ -99,21 +99,6 @@ class Settings(BaseSettings):
     llm_cache_ttl: int = Field(3600, description="LLM-Antwort-Cache-Dauer in Sekunden")
 
     # ----------------------------------------------------------
-    # Wetterdaten
-    # ----------------------------------------------------------
-    weather_lat: float               = Field(47.9990,              description="Breitengrad")
-    weather_lon: float               = Field(7.8421,               description="Längengrad")
-    weather_location_name: str       = Field("Mein Standort",      description="Standort-Name")
-    dwd_station_id: Optional[str]    = Field(None,                 description="DWD-Stations-ID")
-    openweathermap_api_key: str      = Field("",                   description="OpenWeatherMap API Key")
-    weather_fetch_interval_min: int  = Field(30,                   description="Wetter-Abfrage-Intervall (Minuten)")
-
-    @property
-    def use_openweathermap(self) -> bool:
-        """OpenWeatherMap nur nutzen wenn API-Key vorhanden."""
-        return bool(self.openweathermap_api_key)
-
-    # ----------------------------------------------------------
     # Web-Scraping
     # ----------------------------------------------------------
     scraping_delay_min: float      = Field(1.5,  description="Min. Verzögerung zwischen Requests (s)")
@@ -227,7 +212,7 @@ class Settings(BaseSettings):
         """Config als Dict – API-Keys werden maskiert."""
         data = self.model_dump()
         for key in ("db_password", "secret_key", "anthropic_api_key",
-                    "openai_api_key", "openweathermap_api_key",
+                    "openai_api_key",
                     "telegram_bot_token", "smtp_password",
                     "pushover_api_key", "pushover_user_key"):
             if data.get(key):

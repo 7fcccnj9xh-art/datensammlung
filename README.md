@@ -2,7 +2,7 @@
 
 Umfassendes Datensammlungs- und Knowledge-Management-System für den UGREEN DXP2800 NAS (UGOS Pro).
 
-Vereint strukturierte Datensammlung (Wetterdaten, APIs), themenbasierte Web-Recherche mit LLM-Verarbeitung und ein lokales Web-Frontend zur Verwaltung aller Inhalte.
+Vereint themenbasierte Web-Recherche mit LLM-Verarbeitung, strukturierte Datensammlung via APIs/RSS und ein lokales Web-Frontend zur Verwaltung aller Inhalte.
 
 ---
 
@@ -11,10 +11,9 @@ Vereint strukturierte Datensammlung (Wetterdaten, APIs), themenbasierte Web-Rech
 - **Topics & Scheduling** – Themen mit konfigurierbaren Intervallen (fix, Cron) automatisch recherchieren lassen
 - **Web-Recherche** – Websites, RSS-Feeds und APIs scrapen; Inhalte via LLM zusammenfassen
 - **LLM-Router** – Automatischer Fallback Ollama (lokal, kostenlos) → Claude → OpenAI
-- **Wetterdaten** – DWD Open Data (kostenlos, kein API-Key) + optional OpenWeatherMap
 - **Quellen-Management** – Trust-Scores, Fehlerrate, bevorzugte Quellen pro Topic
 - **Job-Monitoring** – Alle Ausführungen protokolliert, WebSocket Live-Updates
-- **Vue 3 Frontend** – Dashboard, Knowledge Browser, Wetter-Charts, Settings
+- **Vue 3 Frontend** – Dashboard, Knowledge Browser, Settings
 
 ---
 
@@ -43,11 +42,6 @@ Mindestens folgende Werte in `.env` setzen:
 DB_HOST=192.168.0.101
 DB_PASSWORD=dein_mysql_passwort
 SECRET_KEY=$(openssl rand -hex 32)
-
-# Standort für Wetterdaten
-WEATHER_LAT=47.9990
-WEATHER_LON=7.8421
-WEATHER_LOCATION_NAME=Freiburg im Breisgau
 ```
 
 ### 2. Datenbank einrichten
@@ -88,7 +82,7 @@ knowledge-collector/
 │   ├── models/                 # SQLAlchemy ORM-Models
 │   ├── core/
 │   │   ├── llm/                # LLM-Router + Provider-Clients
-│   │   ├── collectors/         # Web/RSS/Wetter/API Collector
+│   │   ├── collectors/         # Web/RSS/API Collector
 │   │   ├── processors/         # Text- und LLM-Verarbeitung
 │   │   └── scheduler/          # APScheduler + Job-Management
 │   └── api/routes/             # FastAPI-Endpunkte
@@ -120,16 +114,6 @@ Der Router wählt automatisch nach Verfügbarkeit und Kosten:
 | 4 | **OpenAI GPT-4o-mini** | ~$0.15/MTok | Alternativer Cloud-Fallback |
 
 Pro Topic kann ein anderer Provider erzwungen werden (`llm_provider` Feld).
-
----
-
-## Wetterdaten
-
-Standard: **DWD Open Data via BrightSky API** – kostenlos, kein API-Key nötig, Deutschland-fokussiert.
-
-Optional: OpenWeatherMap (API-Key in `.env` → `OPENWEATHERMAP_API_KEY`).
-
-Abfrage-Intervall konfigurierbar: `WEATHER_FETCH_INTERVAL_MIN=30`
 
 ---
 

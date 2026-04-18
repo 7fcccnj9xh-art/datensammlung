@@ -5,7 +5,6 @@ const routes = [
   { path: '/topics',    name: 'Topics',         component: () => import('../views/Topics.vue') },
   { path: '/research',  name: 'Research',       component: () => import('../views/Research.vue') },
   { path: '/sources',   name: 'Sources',        component: () => import('../views/Sources.vue') },
-  { path: '/weather',   name: 'Weather',        component: () => import('../views/Weather.vue') },
   { path: '/settings',  name: 'Settings',       component: () => import('../views/Settings.vue') },
 ]
 

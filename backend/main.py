@@ -21,7 +21,7 @@ from config.settings import get_settings
 from config.database import init_database, close_database
 from core.llm.llm_router import get_llm_router
 from core.scheduler.scheduler import get_scheduler
-from api.routes import topics, research, sources, structured_data, jobs, llm, weather
+from api.routes import topics, research, sources, structured_data, jobs, llm
 from api.middleware.logging import RequestLoggingMiddleware
 
 # ----------------------------------------------------------
@@ -52,7 +52,6 @@ async def lifespan(app: FastAPI):
     logger.info("Knowledge Collector startet...")
     logger.info(f"  DB:       {settings.db_host}:{settings.db_port}/{settings.db_name}")
     logger.info(f"  LLM:      {settings.default_llm_provider}")
-    logger.info(f"  Wetter:   {settings.weather_location_name} ({settings.weather_lat}, {settings.weather_lon})")
     logger.info("=" * 60)
 
     # Verzeichnisse anlegen
@@ -122,7 +121,6 @@ app.include_router(sources.router,        prefix=f"{API_PREFIX}/sources",       
 app.include_router(structured_data.router, prefix=f"{API_PREFIX}/data",            tags=["Structured Data"])
 app.include_router(jobs.router,           prefix=f"{API_PREFIX}/jobs",             tags=["Jobs"])
 app.include_router(llm.router,            prefix=f"{API_PREFIX}/llm",              tags=["LLM"])
-app.include_router(weather.router,        prefix=f"{API_PREFIX}/weather",          tags=["Weather"])
 
 
 # ----------------------------------------------------------
@@ -149,7 +147,6 @@ async def root():
             "structured_data": "/api/data",
             "jobs": "/api/jobs",
             "llm": "/api/llm",
-            "weather": "/api/weather",
         },
     }
 
@@ -174,7 +171,6 @@ async def system_status():
             "jobs":    scheduler.get_scheduled_jobs(),
         },
         "config": {
-            "location":        settings.weather_location_name,
             "default_provider": settings.default_llm_provider,
             "log_level":       settings.log_level,
         },

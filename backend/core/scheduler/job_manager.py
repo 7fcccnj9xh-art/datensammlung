@@ -80,37 +80,6 @@ class JobManager:
 
         return job_db_id
 
-    async def run_weather_job(self) -> int:
-        """Wetterdaten-Job ausführen."""
-        job_db_id = await self._create_job(
-            job_type="weather_fetch", triggered_by="scheduler"
-        )
-        try:
-            await self._update_job(job_db_id, status="running", started_at=datetime.now(timezone.utc))
-
-            from core.scheduler.tasks.weather_task import WeatherTask
-            task    = WeatherTask()
-            metrics = await task.run(job_id=job_db_id)
-
-            await self._update_job(
-                job_db_id,
-                status         = "completed",
-                progress_pct   = 100,
-                status_message = f"Wetter: {metrics.get('records_saved', 0)} Datensätze gespeichert",
-                metrics        = metrics,
-                completed_at   = datetime.now(timezone.utc),
-            )
-
-        except Exception as e:
-            logger.error(f"Wetter-Job {job_db_id} fehlgeschlagen: {e}", exc_info=True)
-            await self._update_job(
-                job_db_id,
-                status="failed", error_detail=str(e),
-                completed_at=datetime.now(timezone.utc),
-            )
-
-        return job_db_id
-
     async def get_job_status(self, job_id: int) -> Optional[dict]:
         """Job-Status aus DB abrufen."""
         async with get_db_session() as db:

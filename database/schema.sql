@@ -167,7 +167,7 @@ CREATE TABLE research_results (
 -- ============================================================
 CREATE TABLE structured_data (
     id              BIGINT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
-    -- Datentyp-Bezeichner: 'weather', 'energy', 'price', 'custom_xyz'
+    -- Datentyp-Bezeichner: 'energy', 'price', 'sensor', 'custom_xyz'
     data_type       VARCHAR(100)     NOT NULL,
     source_id       INT UNSIGNED     DEFAULT NULL,
     -- Flexibles JSON-Schema pro Datentyp
@@ -184,64 +184,7 @@ CREATE TABLE structured_data (
 ) ENGINE=InnoDB;
 
 -- ============================================================
--- 6. WETTERDATEN (spezifisch, optimiert für Zeitreihen)
--- ============================================================
-CREATE TABLE weather_data (
-    id                  BIGINT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
-    -- Messstation/Standort
-    station_id          VARCHAR(100)     NOT NULL,
-    station_name        VARCHAR(200),
-    latitude            DECIMAL(8,5),
-    longitude           DECIMAL(8,5),
-    altitude_m          DECIMAL(7,2),
-    -- Zeitstempel der Messung (UTC)
-    measured_at         DATETIME         NOT NULL,
-    -- Datenquelle: 'dwd', 'openweathermap', 'manual'
-    data_source         VARCHAR(50)      NOT NULL DEFAULT 'dwd',
-    -- Temperaturen in °C
-    temp_c              DECIMAL(5,2),
-    temp_feels_like_c   DECIMAL(5,2),
-    temp_min_c          DECIMAL(5,2),
-    temp_max_c          DECIMAL(5,2),
-    -- Luftfeuchtigkeit %
-    humidity_pct        TINYINT UNSIGNED,
-    -- Luftdruck hPa
-    pressure_hpa        DECIMAL(7,2),
-    pressure_sea_hpa    DECIMAL(7,2),
-    -- Wind
-    wind_speed_ms       DECIMAL(5,2),
-    wind_gust_ms        DECIMAL(5,2),
-    wind_direction_deg  SMALLINT UNSIGNED,
-    -- Niederschlag mm (letzte Stunde)
-    precipitation_mm    DECIMAL(6,2),
-    -- Schneehöhe cm
-    snow_depth_cm       DECIMAL(6,2),
-    -- Bewölkung 0-100%
-    cloud_cover_pct     TINYINT UNSIGNED,
-    -- Sichtweite Meter
-    visibility_m        INT UNSIGNED,
-    -- UV-Index
-    uv_index            DECIMAL(4,2),
-    -- Sonnenscheindauer Minuten (in der letzten Stunde)
-    sunshine_min        DECIMAL(5,2),
-    -- Wetter-Beschreibung
-    weather_code        SMALLINT,
-    weather_description VARCHAR(200),
-    weather_icon        VARCHAR(50),
-    -- Prognose oder Messung?
-    is_forecast         BOOLEAN          NOT NULL DEFAULT FALSE,
-    -- Rohdaten-JSON (vollständige API-Antwort)
-    raw_json            JSON,
-    created_at          DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE KEY uk_station_time_source (station_id, measured_at, data_source),
-    INDEX idx_station_time  (station_id, measured_at),
-    INDEX idx_measured      (measured_at),
-    INDEX idx_forecast      (is_forecast, measured_at)
-) ENGINE=InnoDB;
-
--- ============================================================
--- 7. LLM-KONFIGURATIONEN
+-- 6. LLM-KONFIGURATIONEN
 -- ============================================================
 CREATE TABLE llm_configs (
     id              INT UNSIGNED     AUTO_INCREMENT PRIMARY KEY,
@@ -299,14 +242,14 @@ CREATE TABLE llm_usage (
 ) ENGINE=InnoDB;
 
 -- ============================================================
--- 8. JOB-AUSFÜHRUNGSPROTOKOLL
+-- 7. JOB-AUSFÜHRUNGSPROTOKOLL
 -- ============================================================
 CREATE TABLE jobs (
     id              BIGINT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
     -- Interner Job-Bezeichner (eindeutig pro Lauf)
     job_key         VARCHAR(200)     NOT NULL,
-    -- research, weather_fetch, api_sync, on_demand, backup
-    job_type        ENUM('research','weather_fetch','api_sync','on_demand','backup','export')
+    -- research, api_sync, on_demand, backup
+    job_type        ENUM('research','api_sync','on_demand','backup','export')
                     NOT NULL,
     topic_id        INT UNSIGNED     DEFAULT NULL,
     -- Ausgelöst durch: scheduler, api, user, cron
@@ -337,7 +280,7 @@ CREATE TABLE jobs (
 ) ENGINE=InnoDB;
 
 -- ============================================================
--- 9. BENACHRICHTIGUNGEN
+-- 8. BENACHRICHTIGUNGEN
 -- ============================================================
 CREATE TABLE notifications (
     id              BIGINT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
@@ -359,7 +302,7 @@ CREATE TABLE notifications (
 ) ENGINE=InnoDB;
 
 -- ============================================================
--- 10. ANNOTATIONS / NOTIZEN
+-- 9. ANNOTATIONS / NOTIZEN
 -- ============================================================
 CREATE TABLE annotations (
     id              BIGINT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,

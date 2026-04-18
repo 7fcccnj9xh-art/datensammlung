@@ -95,9 +95,6 @@ const configDisplay = computed(() => {
   if (!config.value) return {}
   return {
     'Standard LLM-Provider':  config.value.default_llm_provider,
-    'Standort':               config.value.weather_location_name,
-    'Koordinaten':            `${config.value.weather_lat}, ${config.value.weather_lon}`,
-    'Wetter-Intervall':       `${config.value.weather_fetch_interval_min} Minuten`,
     'Scraping-Delay':         `${config.value.scraping_delay_min}–${config.value.scraping_delay_max}s`,
     'robots.txt respektieren':config.value.respect_robots_txt ? 'Ja' : 'Nein',
     'Max. parallele Scraper': config.value.max_concurrent_scrapers,

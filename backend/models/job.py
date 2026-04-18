@@ -22,7 +22,7 @@ class Job(Base):
     id:               Mapped[int]             = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     job_key:          Mapped[str]             = mapped_column(String(200), nullable=False)
     job_type:         Mapped[str]             = mapped_column(
-        Enum("research", "weather_fetch", "api_sync", "on_demand", "backup", "export"),
+        Enum("research", "api_sync", "on_demand", "backup", "export"),
         nullable=False
     )
     topic_id:         Mapped[Optional[int]]   = mapped_column(Integer)

@@ -39,7 +39,6 @@ const navItems = [
   { to: '/topics',  icon: '📚', label: 'Topics'     },
   { to: '/research',icon: '🔎', label: 'Recherchen' },
   { to: '/sources', icon: '🌐', label: 'Quellen'    },
-  { to: '/weather', icon: '🌤', label: 'Wetter'     },
   { to: '/settings',icon: '⚙️', label: 'Einstellungen' },
 ]
 

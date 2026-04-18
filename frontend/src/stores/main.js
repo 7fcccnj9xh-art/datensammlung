@@ -51,16 +51,6 @@ export const useMainStore = defineStore('main', () => {
     return data
   }
 
-  async function fetchWeatherCurrent() {
-    const { data } = await api.get('/weather/current')
-    return data
-  }
-
-  async function fetchWeatherHistory(days = 7) {
-    const { data } = await api.get('/weather/history', { params: { days } })
-    return data
-  }
-
   async function fetchLLMStatus() {
     const { data } = await api.get('/llm/status')
     return data
@@ -85,7 +75,6 @@ export const useMainStore = defineStore('main', () => {
     systemStatus, topics, jobs, notifications,
     fetchStatus, fetchTopics, createTopic, updateTopic, deleteTopic,
     triggerResearch, fetchJobs, fetchRunningJobs,
-    fetchWeatherCurrent, fetchWeatherHistory,
     fetchLLMStatus, testLLM,
     fetchResearchResults, fetchSources,
   }

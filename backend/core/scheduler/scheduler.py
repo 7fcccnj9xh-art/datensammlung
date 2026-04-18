@@ -47,7 +47,7 @@ class KnowledgeScheduler:
         Scheduler starten:
         1. Alle aktiven Topics laden
         2. Jobs einplanen
-        3. Feste System-Jobs (Wetter, Backup) hinzufügen
+        3. Feste System-Jobs (Cleanup) hinzufügen
         """
         if self._running:
             return
@@ -60,7 +60,6 @@ class KnowledgeScheduler:
         await self._load_topic_jobs()
 
         # System-Jobs
-        self._schedule_weather_job()
         self._schedule_cleanup_job()
 
         logger.info(f"Scheduler aktiv: {len(self._scheduler.get_jobs())} Jobs geplant")
@@ -188,25 +187,6 @@ class KnowledgeScheduler:
             )
         except Exception as e:
             logger.error(f"Recherche-Job für Topic {topic_id} fehlgeschlagen: {e}", exc_info=True)
-
-    def _schedule_weather_job(self) -> None:
-        """Regelmäßige Wetterdaten-Abfrage einplanen."""
-        interval_min = self.settings.weather_fetch_interval_min
-        self._scheduler.add_job(
-            func=self._run_weather_job,
-            trigger=IntervalTrigger(minutes=interval_min),
-            id="weather_fetch",
-            name=f"Wetterdaten alle {interval_min} Minuten",
-            replace_existing=True,
-        )
-        logger.info(f"Wetter-Job geplant: alle {interval_min} Minuten")
-
-    async def _run_weather_job(self) -> None:
-        """Wetterdaten-Job ausführen."""
-        try:
-            await self.job_manager.run_weather_job()
-        except Exception as e:
-            logger.error(f"Wetter-Job fehlgeschlagen: {e}", exc_info=True)
 
     def _schedule_cleanup_job(self) -> None:
         """Täglicher Cleanup: alte Jobs, Logs etc."""

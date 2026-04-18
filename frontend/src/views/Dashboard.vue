@@ -46,21 +46,6 @@
         </div>
       </div>
 
-      <!-- Aktuelles Wetter -->
-      <div class="card">
-        <h3 class="card-title">Aktuelles Wetter</h3>
-        <div v-if="weather" class="weather-display">
-          <div class="weather-temp">{{ weather.temp_c?.toFixed(1) }}°C</div>
-          <div class="weather-desc">{{ weather.weather_description }}</div>
-          <div class="weather-meta grid grid-2">
-            <div>💧 {{ weather.humidity_pct }}% Luftfeuchte</div>
-            <div>💨 {{ weather.wind_speed_ms?.toFixed(1) }} m/s</div>
-            <div>☁️ {{ weather.cloud_cover_pct }}% Bewölkung</div>
-            <div>📍 {{ weather.station_name }}</div>
-          </div>
-        </div>
-        <div v-else class="loading">Keine Wetterdaten</div>
-      </div>
     </div>
 
     <!-- Letzte Jobs -->
@@ -115,7 +100,6 @@ import { de } from 'date-fns/locale'
 const store         = useMainStore()
 const recentJobs    = ref([])
 const scheduledJobs = ref([])
-const weather       = ref(null)
 const lastUpdated   = ref('–')
 const llmStatus     = ref(null)
 const stats         = ref({ activeTopics: 0, totalTopics: 0, jobsToday: 0, failedToday: 0, newResults: 0, costsThisMonth: '0.00' })
@@ -132,7 +116,7 @@ const providerStatus = computed(() => {
 })
 
 async function loadAll() {
-  await Promise.all([loadJobs(), loadWeather(), loadLLMStatus(), loadTopicStats()])
+  await Promise.all([loadJobs(), loadLLMStatus(), loadTopicStats()])
   lastUpdated.value = format(new Date(), 'HH:mm', { locale: de })
 }
 
@@ -144,10 +128,6 @@ async function loadJobs() {
     const schedData = await fetch('/api/jobs/scheduled').then(r => r.json())
     scheduledJobs.value = schedData
   } catch(e) { console.error(e) }
-}
-
-async function loadWeather() {
-  try { weather.value = await store.fetchWeatherCurrent() } catch {}
 }
 
 async function loadLLMStatus() {
@@ -194,11 +174,6 @@ onUnmounted(() => clearInterval(timer))
 .status-item:last-child { border-bottom: none; }
 .status-name  { font-size: 0.9rem; font-weight: 500; }
 .status-detail { font-size: 0.8rem; color: var(--text-muted); display: block; }
-
-.weather-display { padding: 0.5rem 0; }
-.weather-temp { font-size: 2.5rem; font-weight: 700; color: var(--accent-2); }
-.weather-desc { color: var(--text-muted); margin-bottom: 1rem; text-transform: capitalize; }
-.weather-meta { font-size: 0.85rem; color: var(--text-muted); gap: 0.5rem; }
 
 .scheduled-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .scheduled-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: var(--bg); border-radius: 0.4rem; }

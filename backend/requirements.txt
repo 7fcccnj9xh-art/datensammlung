@@ -54,10 +54,6 @@ pytz==2024.2
 pendulum==3.0.0              # Bessere Datetime-Handhabung
 ujson==5.10.0                # Schnelles JSON
 
-# --- Wetterdaten ---
-wetterdienst==0.90.0         # DWD Open Data Python-Wrapper
-geopy==2.4.1                 # Geo-Berechnungen
-
 # --- Text-Verarbeitung ---
 langdetect==1.0.9            # Spracherkennung
 chardet==5.2.0               # Encoding-Erkennung

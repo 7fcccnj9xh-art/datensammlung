@@ -14,7 +14,7 @@ from config.database import Base
 
 
 class StructuredData(Base):
-    """Generischer Container für strukturierte Daten (Wetter, Energie, Preise, etc.)."""
+    """Generischer Container für strukturierte Daten (Energie, Preise, Sensordaten, etc.)."""
 
     __tablename__ = "structured_data"
 

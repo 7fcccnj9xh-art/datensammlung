@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 -- Prüfen ob Migration bereits durchgeführt
 -- (Dieser Block wird von migration_runner.py gesteuert)
 INSERT IGNORE INTO schema_migrations (version, description)
-VALUES ('001', 'Initial schema: topics, sources, research_results, weather_data, llm_configs, jobs');
+VALUES ('001', 'Initial schema: topics, sources, research_results, structured_data, llm_configs, jobs');
