@@ -6,7 +6,7 @@
 # --- Web Framework ---
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
-python-multipart==0.0.12     # File-Uploads
+python-multipart==0.0.27     # File-Uploads
 
 # --- Datenbank ---
 sqlalchemy[asyncio]==2.0.36
