@@ -52,7 +52,7 @@ aioredis==2.0.1
 python-dateutil==2.9.0
 pytz==2024.2
 pendulum==3.0.0              # Bessere Datetime-Handhabung
-ujson==5.10.0                # Schnelles JSON
+ujson==5.12.1                # Schnelles JSON
 
 # --- Text-Verarbeitung ---
 langdetect==1.0.9            # Spracherkennung
